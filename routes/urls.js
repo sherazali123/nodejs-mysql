@@ -7,6 +7,7 @@ _module         = '/mws';
 // URLs to expose for the client [saved as const]
 var simple = {
     _TEST:                         _prefix + _module + '/test',
+    _GetServiceStatus:             _prefix + _module + '/get-service-status',
 
 };
 

@@ -36,6 +36,15 @@ transporter 					= nodemailer.createTransport(process.env.nodemailer),
 // eventEmitter, the dependencey on module auth.js
 event_emitter					= require('events').EventEmitter,
 
+// controlling the mws from third party resource
+mws 							= require("mws-nodejs").mws,
+
+// mws configuration settings
+mws_config 						= require("../config/mws.json"),
+
+// module to parse XML string 
+parseXMLString 					= require('xml2js').parseString;
+
 // async, the dependencey on module auth.js
 async							= require('async');
 
@@ -58,4 +67,20 @@ exports.test = function(data,callback) {
        }]
     });
 
+};
+
+
+exports.GetServiceStatus = function(data, callback) {
+	mws.products.GetServiceStatus(mws_config, true, function (err, xml) {
+
+		parseXMLString(xml, function(err, json){
+			console.log(json)
+
+			callback({
+				status: "success",
+				data: json,
+				errors: []
+			});
+		});
+	});
 };

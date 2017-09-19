@@ -32,4 +32,25 @@ module.exports = function(app){
     }
 
   });
+
+  // get MWS service status
+    app.get(urls._GetServiceStatus, function(req, res){
+
+      var errors = req.validationErrors();
+      if (errors) {
+        // return errors if found any error in the request
+        res.send({status: 'error', errors: errors});
+        return;
+      } else {
+        var
+        data      = {
+        };
+        // test API
+        mws.GetServiceStatus(data, function(found){
+          console.log(found);
+          res.json(found);
+        });
+      }
+
+    });
 };
