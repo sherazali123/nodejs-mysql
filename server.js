@@ -1,71 +1,42 @@
-
-/**
- * Module dependencies.
- * created by sheraz & mubarak
- * 19/09/17
+/*
+ * Module dependencies
  */
 
-var express = require('express');
-var routes = require('./routes');
-var http = require('http');
-var path = require('path');
+// this will load the environment (.env) file from root
+require('dotenv').config()
 
-//load customers route
-var customers = require('./routes/customers'); 
-var app = express();
+console.log("Node running ON env: ", process.env.environment);
 
-var connection  = require('express-myconnection'); 
-var mysql = require('mysql');
-
-// all environments
-app.set('port', process.env.PORT || 4300);
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'ejs');
-//app.use(express.favicon());
-app.use(express.logger('dev'));
-app.use(express.json());
-app.use(express.urlencoded());
-app.use(express.methodOverride());
-
-app.use(express.static(path.join(__dirname, 'public')));
-
-// development only
-if ('development' == app.get('env')) {
-  app.use(express.errorHandler());
-}
-
-/*------------------------------------------
-    connection peer, register as middleware
-    type koneksi : single,pool and request 
--------------------------------------------*/
-
-app.use(
-    
-    connection(mysql,{
-        
-        host: 'localhost',
-        user: 'root',
-        password : 'root',
-        port : 3306, //port mysql
-        database:'nodejs'
-
-    },'pool') //or single
-
-);
+var
+  express       = require('express'),
+  connect       = require('connect'),
+  bodyParser    = require('body-parser'),
+  validator     = require('express-validator'),
+  app           = express(),
+  mysql			= require('mysql'),
+  port          = process.env.PORT || 4300;
 
 
-
-app.get('/', routes.index);
-app.get('/customers', customers.list);
-app.get('/customers/add', customers.add);
-app.post('/customers/add', customers.save);
-app.get('/customers/delete/:id', customers.delete_customer);
-app.get('/customers/edit/:id', customers.edit);
-app.post('/customers/edit/:id',customers.save_edit);
+// Configuration
+app.use(express.static(__dirname + '/public'));
+// app.use(connect.logger());
 
 
-app.use(app.router);
+// parse application/x-www-form-urlencoded
+app.use(bodyParser.urlencoded({ limit: "50mb", extended: true, parameterLimit:50000 }));
 
-http.createServer(app).listen(app.get('port'), function(){
-  console.log('Express server listening on port ' + app.get('port'));
+// parse application/json
+app.use(bodyParser.json({limit: "50mb"}));
+
+app.use(validator());
+
+// extend validators
+require('./helpers/extend_validators.js')(app, validator);
+
+// Routes
+require('./routes/routes.js')(app, express);
+
+// Listen on the port
+app.listen(port, function(){
+	console.log("The node will run on " + port)
 });
